@@ -143,6 +143,12 @@ variable "AmazonChimeWebhookURL" {
     description = "Enter the Chime Webhook URL, If you don't prefer to use Amazon Chime, leave the default (empty)."
 }
 
+variable "FeishuWebhookURL" {
+    type    = string
+    default = ""
+    description = "Enter the Feishu Webhook URL, If you don't prefer to use Feishu, leave the default (empty)."
+}
+
 variable "Regions" {
     type = string
     default = "all regions"
@@ -435,9 +441,9 @@ resource "aws_secretsmanager_secret" "FeishuChannelID" {
     }
 }
 resource "aws_secretsmanager_secret_version" "FeishuChannelID" {
-    count = "${var.FeishuChimeWebhookURL == "" ? 0 : 1}"
+    count = "${var.FeishuWebhookURL == "" ? 0 : 1}"
     secret_id     = "${aws_secretsmanager_secret.FeishuChannelID.*.id[count.index]}"
-    secret_string = "${var.FeishuChimeWebhookURL}"
+    secret_string = "${var.FeishuWebhookURL}"
 }
 
 # Secrets - AssumeRoleSecret
@@ -605,6 +611,22 @@ data "aws_iam_policy_document" "AHA-LambdaPolicy-Document" {
       resources = [
           aws_secretsmanager_secret.ChimeChannelID[0].arn,
           "arn:aws:secretsmanager:${local.secondary_region}:${data.aws_caller_identity.current.account_id}:secret:${element(split(":", aws_secretsmanager_secret.ChimeChannelID[0].arn),6)}"
+      ]
+    }
+  }
+  dynamic "statement" {
+    for_each = var.FeishuWebhookURL == "" ? [] : [1]
+    content {
+      effect = "Allow"
+      actions = [
+          "secretsmanager:GetResourcePolicy",
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:ListSecretVersionIds",
+          "secretsmanager:GetSecretValue",
+      ]
+      resources = [
+          aws_secretsmanager_secret.FeishuChannelID[0].arn,
+          "arn:aws:secretsmanager:${local.secondary_region}:${data.aws_caller_identity.current.account_id}:secret:${element(split(":", aws_secretsmanager_secret.FeishuChannelID[0].arn),6)}"
       ]
     }
   }
