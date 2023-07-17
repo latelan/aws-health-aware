@@ -417,6 +417,29 @@ resource "aws_secretsmanager_secret_version" "ChimeChannelID" {
     secret_string = "${var.AmazonChimeWebhookURL}"
 }
 
+# Secrets - FeishuChannelSecret
+resource "aws_secretsmanager_secret" "FeishuChannelID" {
+    count = "${var.FeishuWebhookURL == "" ? 0 : 1}"
+    name             = "FeishuChannelID"
+    description      = "Feishu Channel ID Secret"
+    recovery_window_in_days      = 0
+    tags             = {
+        "HealthCheckChime" = "ChannelID"
+        "Name"             = "AHA-FeishuChannelID-${random_string.resource_code.result}"
+    }
+    dynamic "replica" {
+      for_each = var.aha_secondary_region == "" ? [] : [1]
+      content {
+        region = var.aha_secondary_region
+      }
+    }
+}
+resource "aws_secretsmanager_secret_version" "FeishuChannelID" {
+    count = "${var.FeishuChimeWebhookURL == "" ? 0 : 1}"
+    secret_id     = "${aws_secretsmanager_secret.FeishuChannelID.*.id[count.index]}"
+    secret_string = "${var.FeishuChimeWebhookURL}"
+}
+
 # Secrets - AssumeRoleSecret
 resource "aws_secretsmanager_secret" "AssumeRoleArn" {
     count = "${var.ManagementAccountRoleArn == "" ? 0 : 1}"

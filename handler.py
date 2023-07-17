@@ -116,6 +116,7 @@ def send_org_alert(event_details, affected_org_accounts, affected_org_entities, 
     slack_url = get_secrets()["slack"]
     teams_url = get_secrets()["teams"]
     chime_url = get_secrets()["chime"]
+    feishu_url = get_secrets()["feishu"]
     SENDER = os.environ['FROM_EMAIL']
     RECIPIENT = os.environ['TO_EMAIL']
     event_bus_name = get_secrets()["eventbusname"]
@@ -164,6 +165,17 @@ def send_org_alert(event_details, affected_org_accounts, affected_org_entities, 
                 teams_url)
         except HTTPError as e:
             print("Got an error while sending message to Teams: ", e.code, e.reason)
+        except URLError as e:
+            print("Server connection failed: ", e.reason)
+            pass
+    if "open.feishu.cn/open-apis" in feishu_url:
+        try:
+            print("Sending the alert to FeiShu")
+            send_to_feishu(
+                get_org_message_for_feishu(event_details, event_type, affected_org_accounts, resources),
+                feishu_url)
+        except HTTPError as e:
+            print("Got an error while sending message to Feishu: ", e.code, e.reason)
         except URLError as e:
             print("Server connection failed: ", e.reason)
             pass
@@ -219,6 +231,18 @@ def send_to_chime(message, webhookurl):
 def send_to_teams(message, webhookurl):
     teams_message = message
     req = Request(webhookurl, data=json.dumps(teams_message).encode("utf-8"),
+                  headers={"content-type": "application/json"})
+    try:
+        response = urlopen(req)
+        response.read()
+    except HTTPError as e:
+        print("Request failed : ", e.code, e.reason)
+    except URLError as e:
+        print("Server connection failed: ", e.reason, e.reason)
+
+def send_to_feishu(message, webhookurl):
+    feishu_message = message
+    req = Request(webhookurl, data=json.dumps(feishu_message).encode("utf-8"),
                   headers={"content-type": "application/json"})
     try:
         response = urlopen(req)

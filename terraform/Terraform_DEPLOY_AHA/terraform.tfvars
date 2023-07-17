@@ -10,6 +10,7 @@ AWSHealthEventType="issue | accountNotification | scheduledChange"
 SlackWebhookURL=""
 MicrosoftTeamsWebhookURL=""
 AmazonChimeWebhookURL=""
+FeishuWebhookURL=""
 EventBusName=""
 
 # Email Setup - For Alerting via Email
