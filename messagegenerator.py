@@ -477,7 +477,47 @@ def get_org_message_for_teams(event_details, event_type, affected_org_accounts, 
 
 
 def get_message_for_feishu(event_details, event_type, affected_accounts, affected_entities):
-    pass
+    message = ""
+    summary = ""
+    if len(affected_entities) >= 1:
+        affected_entities = "\n".join(affected_entities)
+    else:
+        affected_entities = "All resources in region"
+    if len(affected_accounts) >= 1:
+        affected_accounts = "\n".join(affected_accounts)
+    else:
+        affected_accounts = "All accounts in region"
+    if event_type == "create":
+        message = {
+            "msg_type": "text",
+            "content": {
+                "text": "[Account(s)]: " + affected_accounts + "\n"
+                "[Resource(s)]: " + affected_entities + "\n"
+                "[Service]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
+                "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
+                "[Start Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['startTime']) + "\n"
+                "[Status]: " + event_details['successfulSet'][0]['event']['statusCode'] + "\n"
+                "[Event ARN]: " + event_details['successfulSet'][0]['event']['arn'] + "\n"
+                "[Updates]: " + "\n" + get_last_aws_update(event_details)
+            }
+        }
+    elif event_type == "resolve":
+        message = {
+            "msg_type": "text",
+            "content": {
+                "text": "[Account(s)]: " + affected_accounts + "\n"
+                "[Resource(s)]: " + affected_entities + "\n"
+                "[Service]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
+                "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
+                "[Start Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['startTime']) + "\n"
+                "[End Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['endTime']) + "\n"
+                "[Status]: " + event_details['successfulSet'][0]['event']['statusCode'] + "\n"
+                "[Event ARN]: " + event_details['successfulSet'][0]['event']['arn'] + "\n"
+                "[Updates]: " + "\n" + get_last_aws_update(event_details)
+            }
+        }
+    print("Message sent to Feishu: ", message)
+    return message
 
 
 def get_org_message_for_feishu(event_details, event_type, affected_org_accounts, affected_org_entities):

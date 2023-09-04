@@ -94,6 +94,16 @@ def send_alert(event_details, affected_accounts, affected_entities, event_type):
         except URLError as e:
             print("Server connection failed: ", e.reason)
             pass
+    if "open.feishu.cn/open-apis" in feishu_url:
+        try:
+            print("Sending the alert to FeiShu")
+            send_to_feishu(
+                get_message_for_feishu(event_details, event_type, affected_accounts, resources), feishu_url)
+        except HTTPError as e:
+            print("Got an error while sending message to Feishu: ", e.code, e.reason)
+        except URLError as e:
+            print("Server connection failed: ", e.reason)
+            pass
     # validate sender and recipient's email addresses
     if "none@domain.com" not in SENDER and RECIPIENT:
         try:
