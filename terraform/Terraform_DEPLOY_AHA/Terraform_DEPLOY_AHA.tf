@@ -29,20 +29,20 @@ provider "aws" {
 locals {
     source_files = ["../../handler.py", "../../messagegenerator.py"]
 }
-data "template_file" "t_file" {
+data "local_file" "t_file" {
     count = "${length(local.source_files)}"
-    template = "${file(element(local.source_files, count.index))}"
+    filename = "${element(local.source_files, count.index)}"
 }
 data "archive_file" "lambda_zip" {
     type          = "zip"
     output_path   = "lambda_function.zip"
     source {
       filename = "${basename(local.source_files[0])}"
-      content  = "${data.template_file.t_file.0.rendered}"
+      content  = "${data.local_file.t_file[0].content}"
     }
     source {
       filename = "${basename(local.source_files[1])}"
-      content  = "${data.template_file.t_file.1.rendered}"
+      content  = "${data.local_file.t_file[1].content}"
   }
 }
 
@@ -81,6 +81,11 @@ variable "AWSOrganizationsEnabled" {
       )
       error_message = "AWSOrganizationsEnabled variable can only accept Yes or No as values."
     }
+}
+variable "MemberAccountRoleArn" {
+  type  = string
+  default = ""
+  description = "Arn list of the IAM role in the member account for collecting PHD Events, 'None' if depolying into the top-level management account."
 }
 
 variable "ManagementAccountRoleArn" {
@@ -688,6 +693,18 @@ data "aws_iam_policy_document" "AHA-LambdaPolicy-Document" {
     }
   }
   dynamic "statement" {
+    for_each = var.MemberAccountRoleArn == "" ? [] : [1]
+    content {
+      effect = "Allow"
+      actions = [
+          "sts:AssumeRole",
+      ]
+      resources = [
+          for role_arn in split(",", var.MemberAccountRoleArn) : "${role_arn}"
+      ]
+    }
+  }
+  dynamic "statement" {
     for_each = var.ExcludeAccountIDs == "" ? [] : [1]
     content {
       effect = "Allow"
@@ -727,6 +744,7 @@ resource "aws_lambda_function" "AHA-LambdaFunction-PrimaryRegion" {
             "REGIONS"             = var.Regions
             "TO_EMAIL"            = var.ToEmail
             "MANAGEMENT_ROLE_ARN" = var.ManagementAccountRoleArn
+            "MEMBER_ROLE_ARN"     = var.MemberAccountRoleArn
             "ACCOUNT_IDS"         = var.ExcludeAccountIDs
             "S3_BUCKET"           = join("",aws_s3_bucket.AHA-S3Bucket-PrimaryRegion[*].bucket)
         }
@@ -774,6 +792,7 @@ resource "aws_lambda_function" "AHA-LambdaFunction-SecondaryRegion" {
             "REGIONS"             = var.Regions
             "TO_EMAIL"            = var.ToEmail
             "MANAGEMENT_ROLE_ARN" = var.ManagementAccountRoleArn
+            "MEMBER_ROLE_ARN"     = var.MemberAccountRoleArn
             "ACCOUNT_IDS"         = var.ExcludeAccountIDs
             "S3_BUCKET"           = join("",aws_s3_bucket.AHA-S3Bucket-SecondaryRegion[*].bucket)
         }

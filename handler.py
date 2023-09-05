@@ -51,6 +51,7 @@ def send_alert(event_details, affected_accounts, affected_entities, event_type):
     slack_url = get_secrets()["slack"]
     teams_url = get_secrets()["teams"]
     chime_url = get_secrets()["chime"]
+    feishu_url = get_secrets()["feishu"]
     SENDER = os.environ['FROM_EMAIL']
     RECIPIENT = os.environ['TO_EMAIL']
     event_bus_name = get_secrets()["eventbusname"]
@@ -902,8 +903,11 @@ def getAccountIDs():
     print(account_ids)
     return account_ids
 
-def get_sts_token(service):
-    assumeRoleArn = get_secrets()["ahaassumerole"]
+def get_sts_token(service, assumerole=None):
+    if assumerole:
+        assumeRoleArn = assumerole
+    else:
+        assumeRoleArn = get_secrets()["ahaassumerole"]
     boto3_client = None
 
     if "arn:aws:iam::" in assumeRoleArn:
@@ -941,21 +945,35 @@ def get_sts_token(service):
 
     return boto3_client
 
+def getMemberRoles():
+    member_roles = os.environ['MEMBER_ROLE_ARN'].split(',')
+    print(member_roles)
+    return member_roles
+
 def main(event, context):
     print("THANK YOU FOR CHOOSING AWS HEALTH AWARE!")
-    health_client = get_sts_token('health')
     org_status = os.environ['ORG_STATUS']
-    #str_ddb_format_sec = '%s'
 
-    # check for AWS Organizations Status
-    if org_status == "No":
-        #TODO update text below to reflect current functionality
-        print("AWS Organizations is not enabled. Only Service Health Dashboard messages will be alerted.")
-        describe_events(health_client)
+    # check for Member Roles
+    if not (os.environ['MEMBER_ROLE_ARN'] == 'None' and os.environ['MEMBER_ROLE_ARN'] == ''):
+        memberroles = getMemberRoles()
+        for member_role in memberroles:
+            health_client = get_sts_token('health', member_role)
+            print(member_role)
+            print("AWS Organizations is not enabled. Only Service Health Dashboard messages will be alerted for member account.")
+            describe_events(health_client)
     else:
-        print(
-            "AWS Organizations is enabled. Personal Health Dashboard and Service Health Dashboard messages will be alerted.")
-        describe_org_events(health_client)
+        health_client = get_sts_token('health', None)
+
+        # check for AWS Organizations Status
+        if org_status == "No":
+            #TODO update text below to reflect current functionality
+            print("AWS Organizations is not enabled. Only Service Health Dashboard messages will be alerted.")
+            describe_events(health_client)
+        else:
+            print(
+                "AWS Organizations is enabled. Personal Health Dashboard and Service Health Dashboard messages will be alerted.")
+            describe_org_events(health_client)
 
 if __name__ == "__main__":
     main('', '')

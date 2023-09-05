@@ -25,6 +25,7 @@ EventSearchBack="1"
 Regions="all regions"
 ManagementAccountRoleArn=""
 ExcludeAccountIDs=""
+MemberAccountRoleArn=""
 
 # Tags applied to all resources - using module provider. Update them per your requirement.
 default_tags = {
