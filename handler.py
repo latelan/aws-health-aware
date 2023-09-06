@@ -959,7 +959,7 @@ def main(event, context):
         memberroles = getMemberRoles()
         for member_role in memberroles:
             health_client = get_sts_token('health', member_role)
-            print(member_role)
+            print("Searching events and updates for account: ", member_role)
             print("AWS Organizations is not enabled. Only Service Health Dashboard messages will be alerted for member account.")
             describe_events(health_client)
     else:
