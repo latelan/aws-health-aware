@@ -1,7 +1,6 @@
 
 ![](https://github.com/aws-samples/aws-health-aware/blob/main/readme-images/aha_banner.png?raw=1)
 
-
 **Table of Contents**
 
 - [Introduction](#introduction)
@@ -69,6 +68,7 @@ Read more about the [new feature and how to filter events using EventBridge](htt
 | `LambdaSchedulePermission`   | IAM Role used for LambdaSchedule     |
 | `MicrosoftChannelSecret`      | Webhook URL for Microsoft Teams stored in AWS Secrets Manager       |
 | `SlackChannelSecret`   | Webhook URL for Slack stored in AWS Secrets Manager     |
+| `FeishuChannelSecret` | Webhook URL for Feishu stored in AWS Secrets Manager |
 
 # Configuring an Endpoint
 AHA can send to multiple endpoints (webhook URLs, Email or EventBridge). To use any of these you'll need to set it up before-hand as some of these are done on 3rd party websites. We'll go over some of the common ones here.
@@ -127,6 +127,14 @@ AHA can send to multiple endpoints (webhook URLs, Email or EventBridge). To use 
 6. From this page you can change the name of the webhook (i.e. AWS Bot), the icon/emoji to use, etc. **Click** *Create* when done.  
 7. For the deployment we will need the webhook *URL* that is presented.
 
+## Creating a Feishu Webhook URL
+**You will need to have access to create a Feishu group and manage webhooks.**
+
+1. Create a new [group](https://www.feishu.cn/hc/en-US/articles/360025113754-create-a-group-chat) for events (i.e. aws_events)
+2. Within your Feishu group go to *Settings* and click on *Add Bot*.
+3. **Click** on *Custom Bot.*
+4. Type a name for the bot (e.g. AWS Health Bot) and description (e.g. Push AWS Health Events to Feishu Via webhook.) and **click** Add.
+5. **Click** *Copy URL*, we will need it for the deployment.
 ## Configuring an Email
 
 1. You'll be able to send email alerts to one or many addresses. However, you must first [verify](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html) the email(s) in the Simple Email Service (SES) console.
@@ -140,18 +148,19 @@ AHA can send to multiple endpoints (webhook URLs, Email or EventBridge). To use 
 2.	On the left hand side, **click** *Event buses*.
 3.	Under *Custom event* bus **click** *Create event bus*
 4.	Give your Event bus a name and **click** *Create*.
-5.  For the deployment we will need the *Name* of the Event bus **(not the ARN, e.g. aha-eb01)**.
+5.	For the deployment we will need the *Name* of the Event bus **(not the ARN, e.g. aha-eb01)**.
 
 # Deployment Options
 
 ## CloudFormation
-There are 3 available ways to deploy AHA, all are done via the same CloudFormation template to make deployment as easy as possible.
+There are 4 available ways to deploy AHA, all are done via the same CloudFormation template to make deployment as easy as possible.
 
-The 3 deployment methods for AHA are:
+The 4 deployment methods for AHA are:
 
 1. [**AHA for users WITHOUT AWS Organizations**](#aha-without-aws-organizations-using-cloudformation): Users NOT using AWS Organizations.
 2. [**AHA for users WITH AWS Organizations (Management Account)**](#aha-with-aws-organizations-on-management-account-using-cloudformation): Users who ARE using AWS Organizations and deploying in the top-level management account.
 3. [**AHA for users WITH AWS Organizations (Member Account)**](#aha-with-aws-organizations-on-member-account-using-cloudformation): Users who ARE using AWS Organizations and deploying in a member account in the organization to assume a role in the top-level management account.
+4. [**AHA for users WITH AWS Organizations WITHOUT assuming a role to the top-level management account (Member Account)**](AHA WITH AWS Organizations on Member Account WITH assuming a role to other account using CloudFormation): Users who ARE using AWS Organizations but with no permission to setup a role in the top-level management account, and deploying in a member account in the organization to assume a role in other member account.
 
 ## AHA Without AWS Organizations using CloudFormation
 
@@ -273,6 +282,61 @@ The 3 deployment methods for AHA are:
 16. Scroll to the bottom and **click** *Next* again.
 17. Scroll to the bottom and **click** the *checkbox* and **click** *Create stack*.
 18. Wait until *Status* changes to *CREATE_COMPLETE* (roughly 2-4 minutes or if deploying in a secondary region, it can take up to 30 minutes).
+
+## AHA WITH AWS Organizations on Member Account WITH assuming a role to other account using CloudFormation
+
+### Prerequisites
+
+1. Have at least 1 [endpoint](https://github.com/latelan/aws-health-aware#configuring-an-endpoint) configured (you can have multiple)
+2. Have access to deploy Cloudformation Templates with the following resource: AWS IAM policies in the **AWS Organizations Member Account**.
+3. If using Multi-Region, you must deploy the following 2 CloudFormation templates in the **Member Account** to allow the Stackset deployment to deploy resources **even if you have full administrator privileges, you still need to follow these steps**.
+- In CloudFormation Console create a stack with new resources from the following S3 URL: https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetAdministrationRole.yml - this will allows CFT Stacksets to launch AHA in another region
+- Launch the stack.
+- In CloudFormation Console create a stack with new resources from the following S3 URL: https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetExecutionRole.yml) - In *AdministratorAccountId* type in the 12 digit account number you're running the solution in (e.g. 000123456789)
+- Launch the stack.
+
+### Deployment
+
+1. Clone the AHA package that from this repository. If you're not familiar with the process, [here](https://git-scm.com/docs/git-clone) is some documentation. The URL to clone is in the upper right-hand corner labeled `Clone uri`
+2. In your other member account AWS console go to *CloudFormation*
+3. In the *CloudFormation* console **click** *Create stack > With new resources (standard)*.
+4. Under *Template Source* **click** *Upload a template file* and **click** *Choose file* and select `CFN_MBR_ROLE.yml` **Click** *Next*.
+
+- In *Stack name* type a stack name (i.e. aha-assume-role).
+- In *OrgMemberAccountId* put in the account id of the member account you plan to run AHA in (e.g. 000123456789).
+
+5. Scroll to the bottom and **click** *Next*.
+
+6. Scroll to the bottom and **click** *Next* again.
+
+7. Scroll to the bottom and **click** the *checkbox* and **click** *Create stack*.
+
+8. Wait until *Status* changes to *CREATE_COMPLETE* (roughly 1-2 minutes). This will create an IAM role with the necessary AWS Organizations and AWS Health API permissions for the member account to assume.
+
+9. In the *Outputs* tab, there will be a value for *AWSHealthAwareRoleForPHDEventsArn* (e.g. arn:aws:iam::000123456789:role/aha-org-role-AWSHealthAwareRoleForPHDEvents-ABCSDE12201), copy that down as you will need it for step 16.
+10. Repeat Step 2 to Step 9 for other member account, and copy all values for *AWSHealthAwareRoleForPHDEventsArn* as you will need it later
+11. Back In the root of the package you downloaded/cloned you'll have two files; `handler.py` and `messagegenerator.py`. Use your tool of choice to zip them both up and name them with a unique name (e.g. aha-v1.8.zip). **Note: Putting the version number in the name will make upgrading AHA seamless.**
+12. Upload the .zip you created in Step 11 to an S3 in the same region you plan to deploy this in.
+13. Login to the member account you plan to deploy this in and in your AWS console go to *CloudFormation*.
+14. In the *CloudFormation* console **click** *Create stack > With new resources (standard)*.
+15. Under *Template Source* **click** *Upload a template file* and **click** *Choose file* and select `CFN_DEPLOY_AHA.yml` **Click** *Next*.
+
+- In *Stack name* type a stack name (i.e. AHA-Deployment).
+- Leave *AWSOrganizationsEnabled* change as default cause we don't need it under this deployment mode.
+- In *AWSHealthEventType* select whether you want to receive *all* event types or *only* issues.
+- In *S3Bucket* type ***just*** the bucket name of the S3 bucket used in step 12 (e.g. my-aha-bucket).
+- In *S3Key* type ***just*** the name of the .zip file you created in Step 11 (e.g. aha-v1.8.zip).
+- In the *Communications Channels* section enter the URLs, Emails and/or ARN of the endpoints you configured previously.
+- In the *Email Setup* section enter the From and To Email addresses as well as the Email subject. If you aren't configuring email, just leave it as is.
+- In *EventSearchBack* enter in the amount of hours you want to search back for events. Default is 1 hour.
+- In *Regions* enter in the regions you want to search for events in. Default is all regions. You can filter for up to 10, comma separated with (e.g. us-east-1, us-east-2).
+- In *MemberAccountRoleArn* enter in the all IAM arn separated with comma from step 10 (e.g. arn:aws:iam::000123456789:role/aha-org-role-AWSHealthAwareRoleForPHDEvents-ABCSDE12201,arn:aws:iam::000123123123:role/aha-org-role-AWSHealthAwareRoleForPHDEvents-ABCSDE12201)
+- In *Deploy in secondary region?* select another region to deploy AHA in. Otherwise leave to default No.
+
+1. Scroll to the bottom and **click** *Next*.
+2. Scroll to the bottom and **click** *Next* again.
+3. Scroll to the bottom and **click** the *checkbox* and **click** *Create stack*.
+4. Wait until *Status* changes to *CREATE_COMPLETE* (roughly 2-4 minutes or if deploying in a secondary region, it can take up to 30 minutes).
 
 ## Terraform
 
