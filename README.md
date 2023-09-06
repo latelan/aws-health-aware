@@ -26,6 +26,9 @@
   - [AHA With AWS Organizations on Member Account using CloudFormation](#aha-with-aws-organizations-on-member-account-using-cloudformation)
     - [Prerequisites](#prerequisites-2)
     - [Deployment](#deployment-2)
+  - [AHA With AWS Organizations on Member Account WITHOUT Management Account Role using CloudFormation](#aha-with-aws-organizations-on-member-account-without-management-account-role-using-cloudformation)
+    - [Prerequisites](#prerequisites-3)
+    - [Deployment](#deployment-3)
   - [Terraform](#terraform)
   - [AHA Without AWS Organizations using Terraform](#aha-without-aws-organizations-using-terraform)
     - [Prerequisites](#prerequisites-3)
@@ -160,7 +163,7 @@ The 4 deployment methods for AHA are:
 1. [**AHA for users WITHOUT AWS Organizations**](#aha-without-aws-organizations-using-cloudformation): Users NOT using AWS Organizations.
 2. [**AHA for users WITH AWS Organizations (Management Account)**](#aha-with-aws-organizations-on-management-account-using-cloudformation): Users who ARE using AWS Organizations and deploying in the top-level management account.
 3. [**AHA for users WITH AWS Organizations (Member Account)**](#aha-with-aws-organizations-on-member-account-using-cloudformation): Users who ARE using AWS Organizations and deploying in a member account in the organization to assume a role in the top-level management account.
-4. [**AHA for users WITH AWS Organizations WITHOUT assuming a role to the top-level management account (Member Account)**](#aha-with-aws-organizations-on-member-account-with-assuming-a-role-to-other-account-using-cloudformation): Users who ARE using AWS Organizations but with no permission to setup a role in the top-level management account, and deploying in a member account in the organization to assume a role in other member account.
+4. [**AHA With AWS Organizations on Member Account WITHOUT Management Account Role using CloudFormation (Member Account)**](#aha-with-aws-organizations-on-member-account-without-management-account-role-using-cloudformation): Users who ARE using AWS Organizations but with no permission to setup a role in the top-level management account, and deploying in a member account in the organization to assume a role in other member account.
 
 ## AHA Without AWS Organizations using CloudFormation
 
@@ -283,7 +286,7 @@ The 4 deployment methods for AHA are:
 17. Scroll to the bottom and **click** the *checkbox* and **click** *Create stack*.
 18. Wait until *Status* changes to *CREATE_COMPLETE* (roughly 2-4 minutes or if deploying in a secondary region, it can take up to 30 minutes).
 
-## AHA WITH AWS Organizations on Member Account WITH assuming a role to other account using CloudFormation
+## AHA WITH AWS Organizations on Member Account WITHOUT Management Account Role using CloudFormation
 
 ### Prerequisites
 
