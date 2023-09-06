@@ -163,7 +163,7 @@ The 4 deployment methods for AHA are:
 1. [**AHA for users WITHOUT AWS Organizations**](#aha-without-aws-organizations-using-cloudformation): Users NOT using AWS Organizations.
 2. [**AHA for users WITH AWS Organizations (Management Account)**](#aha-with-aws-organizations-on-management-account-using-cloudformation): Users who ARE using AWS Organizations and deploying in the top-level management account.
 3. [**AHA for users WITH AWS Organizations (Member Account)**](#aha-with-aws-organizations-on-member-account-using-cloudformation): Users who ARE using AWS Organizations and deploying in a member account in the organization to assume a role in the top-level management account.
-4. [**AHA With AWS Organizations WITHOUT Management Account Role (Member Account)**](#aha-with-aws-organizations-on-member-account-without-management-account-role-using-cloudformation): Users who ARE using AWS Organizations but with no permission to setup a role in the top-level management account, and deploying in a member account in the organization to assume a role in other member account.
+4. [**AHA for users WITH AWS Organizations but WITHOUT Management Account Role (Member Account)**](#aha-with-aws-organizations-on-member-account-without-management-account-role-using-cloudformation): Users who ARE using AWS Organizations but with no permission to setup a role in the top-level management account, and deploying in a member account in the organization to assume a role in other member account.
 
 ## AHA Without AWS Organizations using CloudFormation
 
