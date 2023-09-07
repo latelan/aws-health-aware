@@ -37,6 +37,8 @@
     - [Deployment - Terraform](#deployment---terraform-1)
   - [AHA WITH AWS Organizations on Member Account using Terraform](#aha-with-aws-organizations-on-member-account-using-terraform)
     - [Deployment - Terraform](#deployment---terraform-2)
+  - [AHA WITH AWS Organizations on Member Account WITHOUT Management Account Role using Terraform](#aha-with-aws-organizations-on-member-account-without-management-account-role-using-terraform)
+    - [Deployment - Terraform](#deployment---terraform-4)
 - [Updating using CloudFormation](#updating-using-cloudformation)
 - [Updating using Terraform](#updating-using-terraform)
 - [New Features](#new-features)
@@ -325,7 +327,7 @@ The 4 deployment methods for AHA are:
 15. Under *Template Source* **click** *Upload a template file* and **click** *Choose file* and select `CFN_DEPLOY_AHA.yml` **Click** *Next*.
 
 - In *Stack name* type a stack name (i.e. AHA-Deployment).
-- Leave *AWSOrganizationsEnabled* change as default cause we don't need it under this deployment mode.
+- Leave *AWSOrganizationsEnabled* change as default as we don't need it under this deployment mode.
 - In *AWSHealthEventType* select whether you want to receive *all* event types or *only* issues.
 - In *S3Bucket* type ***just*** the bucket name of the S3 bucket used in step 12 (e.g. my-aha-bucket).
 - In *S3Key* type ***just*** the name of the .zip file you created in Step 11 (e.g. aha-v1.8.zip).
@@ -336,22 +338,23 @@ The 4 deployment methods for AHA are:
 - In *MemberAccountRoleArn* enter in the all IAM arn separated with comma from step 10 (e.g. arn:aws:iam::000123456789:role/aha-org-role-AWSHealthAwareRoleForPHDEvents-ABCSDE12201,arn:aws:iam::000123123123:role/aha-org-role-AWSHealthAwareRoleForPHDEvents-ABCSDE12201)
 - In *Deploy in secondary region?* select another region to deploy AHA in. Otherwise leave to default No.
 
-1. Scroll to the bottom and **click** *Next*.
-2. Scroll to the bottom and **click** *Next* again.
-3. Scroll to the bottom and **click** the *checkbox* and **click** *Create stack*.
-4. Wait until *Status* changes to *CREATE_COMPLETE* (roughly 2-4 minutes or if deploying in a secondary region, it can take up to 30 minutes).
+16. Scroll to the bottom and **click** *Next*.
+17. Scroll to the bottom and **click** *Next* again.
+18. Scroll to the bottom and **click** the *checkbox* and **click** *Create stack*.
+19. Wait until *Status* changes to *CREATE_COMPLETE* (roughly 2-4 minutes or if deploying in a secondary region, it can take up to 30 minutes).
 
 ## Terraform
 
-There are 3 available ways to deploy AHA, all are done via the same Terraform template to make deployment as easy as possible.
+There are 4 available ways to deploy AHA, all are done via the same Terraform template to make deployment as easy as possible.
 
 **NOTE: ** AHA code is tested with Terraform version v1.0.9, please make sure to have minimum terraform verson of v1.0.9 installed.
 
-The 3 deployment methods for AHA are:
+The 4 deployment methods for AHA are:
 
 1. [**AHA for users NOT using AWS Organizations using Terraform**](#aha-without-aws-organizations-using-terraform): Users NOT using AWS Organizations.
 2. [**AHA for users WITH AWS Organizations using Terraform (Management Account)**](#aha-with-aws-organizations-on-management-account-using-terraform): Users who ARE using AWS Organizations and deploying in the top-level management account.
 3. [**AHA for users WITH AWS Organizations using Terraform (Member Account)**](#aha-with-aws-organizations-on-member-account-using-terraform): Users who ARE using AWS Organizations and deploying in a member account in the organization to assume a role in the top-level management account.
+4. [**AHA for users WITH AWS Organizations but WITHOUT Management Account Role using Terrform (Member Account)**](#aha-with-aws-organizations-on-member-account-without-management-account-role-using-terraform): Users who ARE using AWS Organizations but with no permission to setup a role in the top-level management account, and deploying in a member account in the organization to assume a role in other member account.
 
 ## AHA Without AWS Organizations using Terraform
 
@@ -366,7 +369,7 @@ The 3 deployment methods for AHA are:
 
 1. Clone the AHA package that from this repository. If you're not familiar with the process, [here](https://git-scm.com/docs/git-clone) is some documentation. The URL to clone is in the upper right-hand corner labeled `Clone uri`
 ```
-$ git clone https://github.com/aws-samples/aws-health-aware.git
+$ git clone https://github.com/latelan/aws-health-aware.git
 $ cd aws-health-aware/terraform/Terraform_DEPLOY_AHA
 ```
 2. Update parameters file **terraform.tfvars** as below
@@ -399,7 +402,7 @@ $ terraform apply
 
 1. Clone the AHA package that from this repository. If you're not familiar with the process, [here](https://git-scm.com/docs/git-clone) is some documentation. The URL to clone is in the upper right-hand corner labeled `Clone uri`
 ```
-$ git clone https://github.com/aws-samples/aws-health-aware.git
+$ git clone https://github.com/latelan/aws-health-aware.git
 $ cd aws-health-aware/terraform/Terraform_DEPLOY_AHA
 ```
 5. Update parameters file **terraform.tfvars** as below
@@ -433,7 +436,7 @@ $ terraform apply
 
 1. Clone the AHA package that from this repository. If you're not familiar with the process, [here](https://git-scm.com/docs/git-clone) is some documentation. The URL to clone is in the upper right-hand corner labeled `Clone uri`
 ```
-$ git clone https://github.com/aws-samples/aws-health-aware.git
+$ git clone https://github.com/latelan/aws-health-aware.git
 ```
 2. In your top-level management account deploy terraform module Terraform_MGMT_ROLE.tf to create Cross-Account Role for PHD access
 ```
@@ -465,7 +468,54 @@ $ terraform plan
 $ terraform apply
 ```
 
+## AHA WITH AWS Organizations on Member Account WITHOUT Management Account Role using Terraform
+
+1. Have at least 1 [endpoint](#configuring-an-endpoint) configured (you can have multiple)
+
+**NOTE: ** For Multi region deployment, DynamoDB table will be created with PAY_PER_REQUEST billing mode insted of PROVISIONED due to limitation with terraform.
+
+### Deployment - Terraform
+
+1. Clone the AHA package that from this repository. If you're not familiar with the process, [here](https://git-scm.com/docs/git-clone) is some documentation. The URL to clone is in the upper right-hand corner labeled `Clone uri`
+```
+$ git clone https://github.com/latelan/aws-health-aware.git
+```
+2. In your member account deploy terraform module Terraform_MBR_ROLE.tf to create Cross-Account Role for PHD access
+```
+$ cd aws-health-aware/terraform/Terraform_MBR_ROLE
+$ terraform init
+$ terraform plan
+$ terraform apply
+ Input *OrgMemberAccountId*  Enter the account id of the member account you plan to run AHA in (e.g. 000123456789).
+```
+3. Wait for deployment to complete. This will create an IAM role with the necessary AWS Organizations and AWS Health API permissions for the member account to assume. and note the **AWSHealthAwareRoleForPHDEventsArn** role name, this will be used during deploying solution in member account
+4. In the *Outputs* section, there will be a value for *AWSHealthAwareRoleForPHDEventsArn* (e.g. arn:aws:iam::000123456789:role/aha-org-role-AWSHealthAwareRoleForPHDEvents-ABCSDE12201), copy that down as you will need to update params file (variable ManagementAccountRoleArn).
+5. Repeat step 2 to 4 for other member account if you have multiple member accounts
+6. Change directory to **terraform/Terraform_DEPLOY_AHA** to deploy the solution
+7. Update parameters file **terraform.tfvars** as below
+ - *aha_primary_region* - change to region where you want to deploy AHA solution
+ - *aha_secondary_region* - Required if needed to deploy in AHA solution in multiple regions, change to another region (Secondary) where you want to deploy AHA solution, Otherwise leave to default empty value.
+ - *AWSOrganizationsEnabled* - Leave it default empty value `No`. As we don't need it under this deployment mode.
+ - *AWSHealthEventType* - select whether you want to receive *all* event types or *only* issues.
+ - *Communications Channels* section - enter the URLs, Emails and/or ARN of the endpoints you configured previously.
+ - *Email Setup* section - enter the From and To Email addresses as well as the Email subject. If you aren't configuring email, just leave it as is.
+ - *EventSearchBack* - enter in the amount of hours you want to search back for events. Default is 1 hour.
+ - *Regions* enter in the regions you want to search for events in. Default is all regions. You can filter for up to 10, comma separated (e.g. us-east-1, us-east-2).
+ - *ManagementAccountRoleArn* - Leave it default empty value
+ - *MemberAccountRoleArn* -  Enter in the all IAM arn separated with comma from step 5 (e.g. arn:aws:iam::000123456789:role/aha-org-role-AWSHealthAwareRoleForPHDEvents-ABCSDE12201,arn:aws:iam::000123123123:role/aha-org-role-AWSHealthAwareRoleForPHDEvents-ABCSDE12201)
+ - *S3Bucket* - type ***just*** the name of the S3 bucket where exclude file .csv you upload. leave it empty if exclude Account feature is not used. 
+ - *ExcludeAccountIDs* - type ***just*** the name of the .csv file you want to upload if needed to exclude accounts from monitoring, else leave it to empty.
+
+8. Deploy the solution using terraform commands below.
+
+```
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+
 # Updating using CloudFormation
+
 **Until this project is migrated to the AWS Serverless Application Model (SAM), updates will have to be done as described below:**
 1. Download the updated CloudFormation Template .yml file and 2 `.py` files.   
 2. Zip up the 2 `.py` files and name the .zip with a different version number than before (e.g. if the .zip you originally uploaded is aha-v1.8.zip the new one should be aha-v1.9.zip)   
@@ -484,7 +534,7 @@ $ terraform apply
 4. Deploy the templates as below
 ```
 $ cd aws-health-aware
-$ git pull https://github.com/aws-samples/aws-health-aware.git
+$ git pull https://github.com/latelan/aws-health-aware.git
 $ cd terraform/Terraform_DEPLOY_AHA
 $ terraform init
 $ terraform plan - This command should show any difference existing config and latest code.
