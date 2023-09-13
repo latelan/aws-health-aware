@@ -15,12 +15,13 @@ Metadata:
           - S3Key
       - Label:
           default: >-
-            Communication Channels - Slack/Microsoft Teams/Amazon Chime And/or
+            Communication Channels - Slack/Microsoft Teams/Amazon Chime/Feishu And/or
             EventBridge
         Parameters:
           - SlackWebhookURL
           - MicrosoftTeamsWebhookURL
           - AmazonChimeWebhookURL
+          - FeishuWebhookURL
           - EventBusName
       - Label:
           default: Email Setup - For Alerting via Email
@@ -34,6 +35,7 @@ Metadata:
           - EventSearchBack
           - Regions
           - ManagementAccountRoleArn
+          - MemberAccountRoleArn
           - SecondaryRegion
           - AccountIDs
     ParameterLabels:
@@ -41,6 +43,8 @@ Metadata:
         default: AWS Organizations Enabled?
       ManagementAccountRoleArn:
         default: ARN of the AWS Organizations Management Account assume role (if using)
+      MemberAccountRoleArn:
+        default: ARN of the AWS Organizations Member Account assume role (if using)
       AWSHealthEventType:
         default: The types of events to get alerted on
       S3Bucket:
@@ -53,6 +57,8 @@ Metadata:
         default: Microsoft Teams Webhook URL
       AmazonChimeWebhookURL:
         default: Amazon Chime Webhook URL
+      FeishuWebhookURL:
+        default: Feishu Webhook URL
       FromEmail:
         default: Email From
       ToEmail:
@@ -71,6 +77,7 @@ Conditions:
   UsingSlack: !Not [!Equals [!Ref SlackWebhookURL, None]]
   UsingTeams: !Not [!Equals [!Ref MicrosoftTeamsWebhookURL, None]]
   UsingChime: !Not [!Equals [!Ref AmazonChimeWebhookURL, None]]
+  UsingFeishu: !Not [!Equals [!Ref FeishuWebhookURL, None]]
   UsingEventBridge: !Not [!Equals [!Ref EventBusName, None]]
   UsingSecrets: !Or [!Condition UsingSlack, !Condition UsingTeams, !Condition UsingChime, !Condition UsingEventBridge, !Condition UsingCrossAccountRole]
   UsingCrossAccountRole: !Not [!Equals [!Ref ManagementAccountRoleArn, None]]
@@ -123,6 +130,10 @@ Parameters:
     Description: Arn of the IAM role in the top-level management account for collecting PHD Events. 'None' if deploying into the top-level management account.
     Type: String
     Default: None
+  MemberAccountRoleArn:
+    Description: Arn(s) of the IAM role in the member account for collecting PHD Events. If you have mulitple accounts you can enter in a comma separated format. 'None' if deploying into the top-level management account.
+    Type: String
+    Default: None
   AWSHealthEventType:
     Description: >-
       Select the event type that you want AHA to report on. Refer to
@@ -165,6 +176,12 @@ Parameters:
     Description: >-
       Enter the Chime Webhook URL, If you don't prefer to use Amazon Chime,
       leave the default (None).   
+    Type: String
+    Default: None
+  FeishuWebhookURL:
+    Description: >-
+      Enter the Slack Webhook URL, If you don't prefer to use Feishu,
+      leave the default (None).
     Type: String
     Default: None
   Regions:
@@ -416,6 +433,7 @@ Resources:
                       ORG_STATUS: ${AWSOrganizationsEnabled}
                       HEALTH_EVENT_TYPE: "${AWSHealthEventType}"
                       MANAGEMENT_ROLE_ARN: "${ManagementAccountRoleArn}"
+                      Member_ROLE_ARN: "${MemberAccountRoleArn}"
   LambdaExecutionRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -624,6 +642,22 @@ Resources:
       Tags:
         - Key: HealthCheckChime
           Value: ChannelID
+  FeishuChannelSecret:
+    Type: 'AWS::SecretsManager::Secret'
+    Condition: UsingFeishu
+    Properties:
+      Name: FeishuChannelID
+      Description: Feishu Channel ID Secret
+      ReplicaRegions:
+        !If
+        - UsingMultiRegion
+        - [{ Region: !Sub '${SecondaryRegion}' }]
+        - !Ref "AWS::NoValue"
+      SecretString:
+        Ref: FeishuWebhookURL
+      Tags:
+        - Key: HealthCheckFeishu
+          Value: ChannelID
   AssumeRoleSecret:
     Type: 'AWS::SecretsManager::Secret'
     Condition: UsingCrossAccountRole    
@@ -679,4 +713,6 @@ Resources:
             Ref: AWSHealthEventType
           MANAGEMENT_ROLE_ARN:
             Ref: ManagementAccountRoleArn
+          MEMBER_ROLE_ARN:
+            Ref: MemberAccountRoleArn
               
