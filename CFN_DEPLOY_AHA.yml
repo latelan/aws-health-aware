@@ -79,8 +79,9 @@ Conditions:
   UsingChime: !Not [!Equals [!Ref AmazonChimeWebhookURL, None]]
   UsingFeishu: !Not [!Equals [!Ref FeishuWebhookURL, None]]
   UsingEventBridge: !Not [!Equals [!Ref EventBusName, None]]
-  UsingSecrets: !Or [!Condition UsingSlack, !Condition UsingTeams, !Condition UsingChime, !Condition UsingEventBridge, !Condition UsingCrossAccountRole]
+  UsingSecrets: !Or [!Condition UsingSlack, !Condition UsingTeams, !Condition UsingChime, !Condition UsingFeishu, !Condition UsingEventBridge, !Condition UsingCrossAccountRole]
   UsingCrossAccountRole: !Not [!Equals [!Ref ManagementAccountRoleArn, None]]
+  UsingCrossMemberAccountRole: !Not [!Equals [!Ref MemberAccountRoleArn, None]]
   NotUsingMultiRegion: !Equals [!Ref SecondaryRegion, 'No']
   UsingMultiRegion: !Not [!Equals [!Ref SecondaryRegion, 'No']]
   TestCondition: !Equals ['true', 'false']
@@ -88,6 +89,7 @@ Conditions:
   UsingMultiRegionSlack: !And [!Condition UsingSlack, !Condition UsingMultiRegion]
   UsingMultiRegionEventBridge: !And [!Condition UsingEventBridge, !Condition UsingMultiRegion]
   UsingMultiRegionChime: !And [!Condition UsingChime, !Condition UsingMultiRegion]
+  UsingMultiRegionFeishu: !And [!Condition UsingFeishu, !Condition UsingMultiRegion]
   UsingMultiRegionCrossAccountRole: !And [!Condition UsingCrossAccountRole, !Condition UsingMultiRegion]
   UsingAccountIds: !Not [!Equals [!Ref AccountIDs, None]]  
 Parameters:
@@ -473,6 +475,7 @@ Resources:
                    - !If [UsingSlack, !Sub '${SlackChannelSecret}', !Ref AWS::NoValue]
                    - !If [UsingEventBridge, !Sub '${EventBusNameSecret}', !Ref AWS::NoValue]
                    - !If [UsingChime, !Sub '${ChimeChannelSecret}', !Ref AWS::NoValue]
+                   - !If [UsingFeishu, !Sub '${FeishuChannelSecret}', !Ref AWS::NoValue]
                    - !If [UsingCrossAccountRole, !Sub '${AssumeRoleSecret}', !Ref AWS::NoValue]      
                    - !If
                      - UsingMultiRegionTeams
@@ -562,6 +565,13 @@ Resources:
                     - sts:AssumeRole
                   Resource: !Ref ManagementAccountRoleArn
                 - !Ref 'AWS::NoValue'                
+              - !If
+                - UsingCrossMemberAccountRole
+                - Effect: Allow
+                  Action:
+                    - sts:AssumeRole
+                  Resource: !Split [",", !Ref MemberAccountRoleArn]
+                - !Ref 'AWS::NoValue'
   LambdaSchedule:
     Type: 'AWS::Events::Rule'
     Properties:
