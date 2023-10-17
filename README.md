@@ -14,6 +14,7 @@
   - [Creating a Slack Webhook URL](#creating-a-slack-webhook-url)
   - [Creating a Microsoft Teams Webhook URL](#creating-a-microsoft-teams-webhook-url)
   - [Creating a Feishu Webhook URL](#creating-a-feishu-webhook-url)
+  - [Creating a Dingtalk Webhook URL](#creating-a-dingtalk-webhook-url)
   - [Configuring an Email](#configuring-an-email)
   - [Creating a Amazon EventBridge Ingestion ARN](#creating-a-amazon-eventbridge-ingestion-arn)
 - [Deployment Options](#deployment-options)
@@ -75,6 +76,7 @@ Read more about the [new feature and how to filter events using EventBridge](htt
 | `MicrosoftChannelSecret`      | Webhook URL for Microsoft Teams stored in AWS Secrets Manager       |
 | `SlackChannelSecret`   | Webhook URL for Slack stored in AWS Secrets Manager     |
 | `FeishuChannelSecret` | Webhook URL for Feishu stored in AWS Secrets Manager |
+| `DingtalkChannelSecret` | Webhook URL for Dingtalk stored in AWS Secrets Manager |
 
 # Configuring an Endpoint
 AHA can send to multiple endpoints (webhook URLs, Email or EventBridge). To use any of these you'll need to set it up before-hand as some of these are done on 3rd party websites. We'll go over some of the common ones here.
@@ -141,6 +143,13 @@ AHA can send to multiple endpoints (webhook URLs, Email or EventBridge). To use 
 3. **Click** on *Custom Bot.*
 4. Type a name for the bot (e.g. AWS Health Bot) and description (e.g. Push AWS Health Events to Feishu Via webhook.) and **click** Add.
 5. **Click** *Copy URL*, we will need it for the deployment.
+## Creating a Dingtalk Webhook URL
+
+**You will need to have access to create a Dingtalk group and manage webhooks.**
+
+1. Refer to [custom robot access](https://open.dingtalk.com/document/orgapp/custom-robot-access#title-jfe-yo9-jl2) to add bot. Put ```HEALTH``` as custom key word
+2. **Click** *Copy URL*, we will need it for the deployment.
+
 ## Configuring an Email
 
 1. You'll be able to send email alerts to one or many addresses. However, you must first [verify](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html) the email(s) in the Simple Email Service (SES) console.
