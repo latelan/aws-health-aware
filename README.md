@@ -13,6 +13,7 @@
   - [Creating a Amazon Chime Webhook URL](#creating-a-amazon-chime-webhook-url)
   - [Creating a Slack Webhook URL](#creating-a-slack-webhook-url)
   - [Creating a Microsoft Teams Webhook URL](#creating-a-microsoft-teams-webhook-url)
+  - [Creating a Feishu Webhook URL](#creating-a-feishu-webhook-url)
   - [Configuring an Email](#configuring-an-email)
   - [Creating a Amazon EventBridge Ingestion ARN](#creating-a-amazon-eventbridge-ingestion-arn)
 - [Deployment Options](#deployment-options)
