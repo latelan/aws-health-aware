@@ -78,6 +78,7 @@ Read more about the [new feature and how to filter events using EventBridge](htt
 | `SlackChannelSecret`   | Webhook URL for Slack stored in AWS Secrets Manager     |
 | `FeishuChannelSecret` | Webhook URL for Feishu stored in AWS Secrets Manager |
 | `DingtalkChannelSecret` | Webhook URL for Dingtalk stored in AWS Secrets Manager |
+| `WecomChannelSecret` | Webhook URL for Wecom stored in AWS Secrets Manager |
 
 # Configuring an Endpoint
 AHA can send to multiple endpoints (webhook URLs, Email or EventBridge). To use any of these you'll need to set it up before-hand as some of these are done on 3rd party websites. We'll go over some of the common ones here.
