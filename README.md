@@ -15,6 +15,7 @@
   - [Creating a Microsoft Teams Webhook URL](#creating-a-microsoft-teams-webhook-url)
   - [Creating a Feishu Webhook URL](#creating-a-feishu-webhook-url)
   - [Creating a Dingtalk Webhook URL](#creating-a-dingtalk-webhook-url)
+  - [Creating a Wecom Webhook URL](#creating-a-wecom-webhook-url)
   - [Configuring an Email](#configuring-an-email)
   - [Creating a Amazon EventBridge Ingestion ARN](#creating-a-amazon-eventbridge-ingestion-arn)
 - [Deployment Options](#deployment-options)
@@ -40,7 +41,7 @@
   - [AHA WITH AWS Organizations on Member Account using Terraform](#aha-with-aws-organizations-on-member-account-using-terraform)
     - [Deployment - Terraform](#deployment---terraform-2)
   - [AHA WITH AWS Organizations on Member Account WITHOUT Management Account Role using Terraform](#aha-with-aws-organizations-on-member-account-without-management-account-role-using-terraform)
-    - [Deployment - Terraform](#deployment---terraform-4)
+    - [Deployment - Terraform](#deployment---terraform-3)
 - [Updating using CloudFormation](#updating-using-cloudformation)
 - [Updating using Terraform](#updating-using-terraform)
 - [New Features](#new-features)
@@ -149,6 +150,16 @@ AHA can send to multiple endpoints (webhook URLs, Email or EventBridge). To use 
 
 1. Refer to [custom robot access](https://open.dingtalk.com/document/orgapp/custom-robot-access#title-jfe-yo9-jl2) to add bot. Put ```HEALTH``` as custom key word
 2. **Click** *Copy URL*, we will need it for the deployment.
+
+## Creating a Wecom Webhook URL
+
+**You will need to have access to create a Wecom group and manage webhooks.**
+
+1. Create a new group for events (i.e. aws_events)
+2. Within your Wecom group go to *Settings* and click on *Add Group Robot*.
+3. **Click** on *New Robot.*
+4. Type a name for the bot (e.g. AWS Health Bot)  and **click** Add.
+5. **Click** *Copy URL*, we will need it for the deployment.
 
 ## Configuring an Email
 

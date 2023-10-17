@@ -12,6 +12,7 @@ MicrosoftTeamsWebhookURL=""
 AmazonChimeWebhookURL=""
 FeishuWebhookURL=""
 DingtalkWebhookURL=""
+WecomWebhookURL=""
 EventBusName=""
 
 # Email Setup - For Alerting via Email

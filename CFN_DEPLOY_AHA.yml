@@ -15,7 +15,7 @@ Metadata:
           - S3Key
       - Label:
           default: >-
-            Communication Channels - Slack/Microsoft Teams/Amazon Chime/Feishu/Dingtalk And/or
+            Communication Channels - Slack/Microsoft Teams/Amazon Chime/Feishu/Dingtalk/Wecom And/or
             EventBridge
         Parameters:
           - SlackWebhookURL
@@ -23,6 +23,7 @@ Metadata:
           - AmazonChimeWebhookURL
           - FeishuWebhookURL
           - DingtalkWebhookURL
+          - WecomWebhookURL
           - EventBusName
       - Label:
           default: Email Setup - For Alerting via Email
@@ -62,6 +63,8 @@ Metadata:
         default: Feishu Webhook URL
       DingtalkWebhookURL:
         default: Dingtalk Webhook URL
+      WecomWebhookURL:
+        default: Wecom Webhook URL
       FromEmail:
         default: Email From
       ToEmail:
@@ -82,8 +85,9 @@ Conditions:
   UsingChime: !Not [!Equals [!Ref AmazonChimeWebhookURL, None]]
   UsingFeishu: !Not [!Equals [!Ref FeishuWebhookURL, None]]
   UsingDingtalk: !Not [!Equals [!Ref DingtalkWebhookURL, None]]
+  UsingWecom: !Not [!Equals [!Ref WecomWebhookURL, None]]
   UsingEventBridge: !Not [!Equals [!Ref EventBusName, None]]
-  UsingSecrets: !Or [!Condition UsingSlack, !Condition UsingTeams, !Condition UsingChime, !Condition UsingFeishu, !Condition UsingDingtalk, !Condition UsingEventBridge, !Condition UsingCrossAccountRole]
+  UsingSecrets: !Or [!Condition UsingSlack, !Condition UsingTeams, !Condition UsingChime, !Condition UsingFeishu, !Condition UsingDingtalk, !Condition UsingWecom, !Condition UsingEventBridge, !Condition UsingCrossAccountRole]
   UsingCrossAccountRole: !Not [!Equals [!Ref ManagementAccountRoleArn, None]]
   UsingCrossMemberAccountRole: !Not [!Equals [!Ref MemberAccountRoleArn, None]]
   NotUsingMultiRegion: !Equals [!Ref SecondaryRegion, 'No']
@@ -95,6 +99,7 @@ Conditions:
   UsingMultiRegionChime: !And [!Condition UsingChime, !Condition UsingMultiRegion]
   UsingMultiRegionFeishu: !And [!Condition UsingFeishu, !Condition UsingMultiRegion]
   UsingMultiRegionDingtalk: !And [!Condition UsingDingtalk, !Condition UsingMultiRegion]
+  UsingMultiRegionWecom: !And [!Condition UsingWecom, !Condition UsingMultiRegion]
   UsingMultiRegionCrossAccountRole: !And [!Condition UsingCrossAccountRole, !Condition UsingMultiRegion]
   UsingAccountIds: !Not [!Equals [!Ref AccountIDs, None]]  
 Parameters:
@@ -187,13 +192,19 @@ Parameters:
     Default: None
   FeishuWebhookURL:
     Description: >-
-      Enter the Slack Webhook URL, If you don't prefer to use Feishu,
+      Enter the Feishu Webhook URL, If you don't prefer to use Feishu,
       leave the default (None).
     Type: String
     Default: None
   DingtalkWebhookURL:
     Description: >-
-      Enter the Slack Webhook URL, If you don't prefer to use Dingtalk,
+      Enter the Dingtalk Webhook URL, If you don't prefer to use Dingtalk,
+      leave the default (None).
+    Type: String
+    Default: None
+  WecomWebhookURL:
+    Description: >-
+      Enter the Wecom Webhook URL, If you don't prefer to use Wecom,
       leave the default (None).
     Type: String
     Default: None
@@ -488,6 +499,7 @@ Resources:
                    - !If [UsingChime, !Sub '${ChimeChannelSecret}', !Ref AWS::NoValue]
                    - !If [UsingFeishu, !Sub '${FeishuChannelSecret}', !Ref AWS::NoValue]
                    - !If [UsingDingtalk, !Sub '${DingtalkChannelSecret}', !Ref AWS::NoValue]
+                   - !If [UsingWecom, !Sub '${WecomChannelSecret}', !Ref AWS::NoValue]
                    - !If [UsingCrossAccountRole, !Sub '${AssumeRoleSecret}', !Ref AWS::NoValue]      
                    - !If
                      - UsingMultiRegionTeams
@@ -695,6 +707,22 @@ Resources:
         Ref: DingtalkWebhookURL
       Tags:
         - Key: HealthCheckDingtalk
+          Value: ChannelID
+  WecomChannelSecret:
+    Type: 'AWS::SecretsManager::Secret'
+    Condition: UsingWecom
+    Properties:
+      Name: WecomChannelID
+      Description: Wecom Channel ID Secret
+      ReplicaRegions:
+        !If
+        - UsingMultiRegion
+        - [{ Region: !Sub '${SecondaryRegion}' }]
+        - !Ref "AWS::NoValue"
+      SecretString:
+        Ref: WecomWebhookURL
+      Tags:
+        - Key: HealthCheckWecom
           Value: ChannelID
   AssumeRoleSecret:
     Type: 'AWS::SecretsManager::Secret'

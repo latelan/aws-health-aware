@@ -488,10 +488,15 @@ def get_message_for_feishu(event_details, event_type, affected_accounts, affecte
     else:
         affected_accounts = "All accounts in region"
     if event_type == "create":
+        summary += (
+            f"**NEW** AWS Health reported an issue with the {event_details['successfulSet'][0]['event']['service'].upper()} service in "
+            f"the {event_details['successfulSet'][0]['event']['region'].upper()} region."
+        )
         message = {
             "msg_type": "text",
             "content": {
-                "text": "[Account(s)]: " + affected_accounts + "\n"
+                "text": summary + "\n"
+                "[Account(s)]: " + affected_accounts + "\n"
                 "[Resource(s)]: " + affected_entities + "\n"
                 "[Service]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
@@ -502,10 +507,15 @@ def get_message_for_feishu(event_details, event_type, affected_accounts, affecte
             }
         }
     elif event_type == "resolve":
+        summary += (
+            f"**RESOLVED** The AWS Health issue with the {event_details['successfulSet'][0]['event']['service'].upper()} service in "
+            f"the {event_details['successfulSet'][0]['event']['region'].upper()} region is now resolved."
+        )
         message = {
             "msg_type": "text",
             "content": {
-                "text": "[Account(s)]: " + affected_accounts + "\n"
+                "text": summary + "\n"
+                "[Account(s)]: " + affected_accounts + "\n"
                 "[Resource(s)]: " + affected_entities + "\n"
                 "[Service]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
@@ -532,10 +542,15 @@ def get_org_message_for_feishu(event_details, event_type, affected_org_accounts,
     else:
         affected_org_accounts = "All accounts in region"
     if event_type == "create":
+        summary += (
+            f"**NEW** AWS Health reported an issue with the {event_details['successfulSet'][0]['event']['service'].upper()} service in "
+            f"the {event_details['successfulSet'][0]['event']['region'].upper()} region."
+        )
         message = {
             "msg_type": "text",
             "content": {
-                "text": "[Account(s)]: " + affected_org_accounts + "\n"
+                "text": summary + "\n"
+                "[Account(s)]: " + affected_accounts + "\n"
                 "[Resource(s)]: " + affected_org_entities + "\n"
                 "[Service]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
@@ -546,10 +561,15 @@ def get_org_message_for_feishu(event_details, event_type, affected_org_accounts,
             }
         }
     elif event_type == "resolve":
+        summary += (
+            f"**RESOLVED** The AWS Health issue with the {event_details['successfulSet'][0]['event']['service'].upper()} service in "
+            f"the {event_details['successfulSet'][0]['event']['region'].upper()} region is now resolved."
+        )
         message = {
             "msg_type": "text",
             "content": {
-                "text": "[Account(s)]: " + affected_org_accounts + "\n"
+                "text": summary + "\n"
+                "[Account(s)]: " + affected_accounts + "\n"
                 "[Resource(s)]: " + affected_org_entities + "\n"
                 "[Service]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
@@ -575,10 +595,15 @@ def get_message_for_dingtalk(event_details, event_type, affected_accounts, affec
     else:
         affected_accounts = "All accounts in region"
     if event_type == "create":
+        summary += (
+            f"**NEW** AWS Health reported an issue with the {event_details['successfulSet'][0]['event']['service'].upper()} service in "
+            f"the {event_details['successfulSet'][0]['event']['region'].upper()} region."
+        )
         message = {
             "msgtype": "text",
             "text": {
-                "content": "[Account(s)]: " + affected_accounts + "\n"
+                "content": summary + "\n"
+                "[Account(s)]: " + affected_accounts + "\n"
                 "[Resource(s)]: " + affected_entities + "\n"
                 "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
@@ -589,10 +614,15 @@ def get_message_for_dingtalk(event_details, event_type, affected_accounts, affec
             }
         }
     elif event_type == "resolve":
+        summary += (
+            f"**RESOLVED** The AWS Health issue with the {event_details['successfulSet'][0]['event']['service'].upper()} service in "
+            f"the {event_details['successfulSet'][0]['event']['region'].upper()} region is now resolved."
+        )
         message = {
             "msgtype": "text",
             "text": {
-                "content": "[Account(s)]: " + affected_accounts + "\n"
+                "content": summary + "\n"
+                "[Account(s)]: " + affected_accounts + "\n"
                 "[Resource(s)]: " + affected_entities + "\n"
                 "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
@@ -618,10 +648,15 @@ def get_org_message_for_dingtalk(event_details, event_type, affected_org_account
     else:
         affected_org_accounts = "All accounts in region"
     if event_type == "create":
+        summary += (
+            f"**NEW** AWS Health reported an issue with the {event_details['successfulSet'][0]['event']['service'].upper()} service in "
+            f"the {event_details['successfulSet'][0]['event']['region'].upper()} region."
+        )
         message = {
             "msgtype": "text",
             "text": {
-                "content": "[Account(s)]: " + affected_org_accounts + "\n"
+                "content": summary + "\n"
+                "[Account(s)]: " + affected_accounts + "\n"
                 "[Resource(s)]: " + affected_org_entities + "\n"
                 "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
@@ -632,10 +667,15 @@ def get_org_message_for_dingtalk(event_details, event_type, affected_org_account
             }
         }
     elif event_type == "resolve":
+        summary += (
+            f"**RESOLVED** The AWS Health issue with the {event_details['successfulSet'][0]['event']['service'].upper()} service in "
+            f"the {event_details['successfulSet'][0]['event']['region'].upper()} region is now resolved."
+        )
         message = {
             "msgtype": "text",
             "text": {
-                "content": "[Account(s)]: " + affected_org_accounts + "\n"
+                "content": summary + "\n"
+                "[Account(s)]: " + affected_accounts + "\n"
                 "[Resource(s)]: " + affected_org_entities + "\n"
                 "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
@@ -647,6 +687,112 @@ def get_org_message_for_dingtalk(event_details, event_type, affected_org_account
             }
         }
     print("Message sent to Dingtalk: ", message)
+    return message
+
+def get_message_for_wecom(event_details, event_type, affected_accounts, affected_entities):
+    message = ""
+    summary = ""
+    if len(affected_entities) >= 1:
+        affected_entities = "\n".join(affected_entities)
+    else:
+        affected_entities = "All resources in region"
+    if len(affected_accounts) >= 1:
+        affected_accounts = "\n".join(affected_accounts)
+    else:
+        affected_accounts = "All accounts in region"
+    if event_type == "create":
+        summary += (
+            f"**NEW** AWS Health reported an issue with the {event_details['successfulSet'][0]['event']['service'].upper()} service in "
+            f"the {event_details['successfulSet'][0]['event']['region'].upper()} region."
+        )
+        message = {
+            "msgtype": "text",
+            "text": {
+                "content": summary + "\n"
+                "[Account(s)]: " + affected_accounts + "\n"
+                "[Resource(s)]: " + affected_entities + "\n"
+                "[Service]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
+                "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
+                "[Start Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['startTime']) + "\n"
+                "[Status]: " + event_details['successfulSet'][0]['event']['statusCode'] + "\n"
+                "[Event ARN]: " + event_details['successfulSet'][0]['event']['arn'] + "\n"
+                "[Updates]: " + "\n" + get_last_aws_update(event_details)
+            }
+        }
+    elif event_type == "resolve":
+        summary += (
+            f"**RESOLVED** The AWS Health issue with the {event_details['successfulSet'][0]['event']['service'].upper()} service in "
+            f"the {event_details['successfulSet'][0]['event']['region'].upper()} region is now resolved."
+        )
+        message = {
+            "msgtype": "text",
+            "text": {
+                "content": summary + "\n"
+                "[Account(s)]: " + affected_accounts + "\n"
+                "[Resource(s)]: " + affected_entities + "\n"
+                "[Service]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
+                "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
+                "[Start Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['startTime']) + "\n"
+                "[End Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['endTime']) + "\n"
+                "[Status]: " + event_details['successfulSet'][0]['event']['statusCode'] + "\n"
+                "[Event ARN]: " + event_details['successfulSet'][0]['event']['arn'] + "\n"
+                "[Updates]: " + "\n" + get_last_aws_update(event_details)
+            }
+        }
+    print("Message sent to Wecom: ", message)
+    return message
+
+def get_org_message_for_wecom(event_details, event_type, affected_org_accounts, affected_org_entities):
+    message = ""
+    summary = ""
+    if len(affected_org_entities) >= 1:
+        affected_org_entities = "\n".join(affected_org_entities)
+    else:
+        affected_org_entities = "All resources in region"
+    if len(affected_org_accounts) >= 1:
+        affected_org_accounts = "\n".join(affected_org_accounts)
+    else:
+        affected_org_accounts = "All accounts in region"
+    if event_type == "create":
+        summary += (
+            f"**NEW** AWS Health reported an issue with the {event_details['successfulSet'][0]['event']['service'].upper()} service in "
+            f"the {event_details['successfulSet'][0]['event']['region'].upper()} region."
+        )
+        message = {
+            "msgtype": "text",
+            "text": {
+                "content": summary + "\n"
+                "[Account(s)]: " + affected_accounts + "\n"
+                "[Resource(s)]: " + affected_org_entities + "\n"
+                "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
+                "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
+                "[Start Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['startTime']) + "\n"
+                "[Status]: " + event_details['successfulSet'][0]['event']['statusCode'] + "\n"
+                "[Event ARN]: " + event_details['successfulSet'][0]['event']['arn'] + "\n"
+                "[Updates]: " + "\n" + get_last_aws_update(event_details)
+            }
+        }
+    elif event_type == "resolve":
+        summary += (
+            f"**RESOLVED** The AWS Health issue with the {event_details['successfulSet'][0]['event']['service'].upper()} service in "
+            f"the {event_details['successfulSet'][0]['event']['region'].upper()} region is now resolved."
+        )
+        message = {
+            "msgtype": "text",
+            "text": {
+                "content": summary + "\n"
+                "[Account(s)]: " + affected_accounts + "\n"
+                "[Resource(s)]: " + affected_org_entities + "\n"
+                "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
+                "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
+                "[Start Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['startTime']) + "\n"
+                "[End Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['endTime']) + "\n"
+                "[Status]: " + event_details['successfulSet'][0]['event']['statusCode'] + "\n"
+                "[Event ARN]: " + event_details['successfulSet'][0]['event']['arn'] + "\n"
+                "[Updates]: " + "\n" + get_last_aws_update(event_details)
+            }
+        }
+    print("Message sent to Wecom: ", message)
     return message
 
 def get_message_for_email(event_details, event_type, affected_accounts, affected_entities):
