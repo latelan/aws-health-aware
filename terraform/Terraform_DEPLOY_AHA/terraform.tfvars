@@ -11,6 +11,7 @@ SlackWebhookURL=""
 MicrosoftTeamsWebhookURL=""
 AmazonChimeWebhookURL=""
 FeishuWebhookURL=""
+DingtalkWebhookURL=""
 EventBusName=""
 
 # Email Setup - For Alerting via Email

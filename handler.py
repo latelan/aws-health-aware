@@ -16,6 +16,7 @@ from boto3.dynamodb.conditions import Key, Attr
 from messagegenerator import get_message_for_slack, get_org_message_for_slack, get_message_for_chime, \
     get_org_message_for_chime, get_message_for_teams, get_org_message_for_teams, \
     get_message_for_feishu, get_org_message_for_feishu, get_message_for_email, get_org_message_for_email, \
+    get_message_for_dingtalk, get_org_message_for_dingtalk, \
     get_detail_for_eventbridge
 
 print("boto3 version: ",boto3.__version__)
@@ -48,13 +49,15 @@ def get_account_name(account_id):
     return account_name
 
 def send_alert(event_details, affected_accounts, affected_entities, event_type):
-    slack_url = get_secrets()["slack"]
-    teams_url = get_secrets()["teams"]
-    chime_url = get_secrets()["chime"]
-    feishu_url = get_secrets()["feishu"]
+    secrets = get_secrets()
+    slack_url = secrets["slack"]
+    teams_url = secrets["teams"]
+    chime_url = secrets["chime"]
+    feishu_url = secrets["feishu"]
+    dingtalk_url = secrets["dingtalk"]
     SENDER = os.environ['FROM_EMAIL']
     RECIPIENT = os.environ['TO_EMAIL']
-    event_bus_name = get_secrets()["eventbusname"]
+    event_bus_name = secrets["eventbusname"]
 
     #get the list of resources from the array of affected entities
     resources = get_resources_from_entities(affected_entities)
@@ -105,6 +108,16 @@ def send_alert(event_details, affected_accounts, affected_entities, event_type):
         except URLError as e:
             print("Server connection failed: ", e.reason)
             pass
+    if "oapi.dingtalk.com/robot" in dingtalk_url:
+        try:
+            print("Sending the alert to Dingtalk")
+            send_to_dingtalk(
+                get_message_for_dingtalk(event_details, event_type, affected_accounts, resources), dingtalk_url)
+        except HTTPError as e:
+            print("Got an error while sending message to Dingtalk: ", e.code, e.reason)
+        except URLError as e:
+            print("Server connection failed: ", e.reason)
+            pass
     # validate sender and recipient's email addresses
     if "none@domain.com" not in SENDER and RECIPIENT:
         try:
@@ -126,13 +139,15 @@ def send_alert(event_details, affected_accounts, affected_entities, event_type):
             pass
 
 def send_org_alert(event_details, affected_org_accounts, affected_org_entities, event_type):
-    slack_url = get_secrets()["slack"]
-    teams_url = get_secrets()["teams"]
-    chime_url = get_secrets()["chime"]
-    feishu_url = get_secrets()["feishu"]
+    secrets = get_secrets()
+    slack_url = secrets["slack"]
+    teams_url = secrets["teams"]
+    chime_url = secrets["chime"]
+    feishu_url = secrets["feishu"]
+    dingtalk_url = secrets["dingtalk"]
     SENDER = os.environ['FROM_EMAIL']
     RECIPIENT = os.environ['TO_EMAIL']
-    event_bus_name = get_secrets()["eventbusname"]
+    event_bus_name = secrets["eventbusname"]
 
     #get the list of resources from the array of affected entities
     resources = get_resources_from_entities(affected_org_entities)
@@ -189,6 +204,17 @@ def send_org_alert(event_details, affected_org_accounts, affected_org_entities, 
                 feishu_url)
         except HTTPError as e:
             print("Got an error while sending message to Feishu: ", e.code, e.reason)
+        except URLError as e:
+            print("Server connection failed: ", e.reason)
+            pass
+    if "oapi.dingtalk.com/robot" in dingtalk_url:
+        try:
+            print("Sending the alert to Dingtalk")
+            send_to_dingtalk(
+                get_org_message_for_dingtalk(event_details, event_type, affected_org_accounts, resources),
+                dingtalk_url)
+        except HTTPError as e:
+            print("Got an error while sending message to Dingtalk: ", e.code, e.reason)
         except URLError as e:
             print("Server connection failed: ", e.reason)
             pass
@@ -265,6 +291,17 @@ def send_to_feishu(message, webhookurl):
     except URLError as e:
         print("Server connection failed: ", e.reason, e.reason)
 
+def send_to_dingtalk(message, webhookurl):
+    dingtalk_message = message
+    req = Request(webhookurl, data=json.dumps(dingtalk_message).encode("utf-8"),
+                  headers={"content-type": "application/json"})
+    try:
+        response = urlopen(req)
+        response.read()
+    except HTTPError as e:
+        print("Request failed : ", e.code, e.reason)
+    except URLError as e:
+        print("Server connection failed: ", e.reason, e.reason)
 
 def send_email(event_details, eventType, affected_accounts, affected_entities):
     SENDER = os.environ['FROM_EMAIL']
@@ -574,6 +611,7 @@ def get_secrets():
     secret_slack_name = "SlackChannelID"
     secret_chime_name = "ChimeChannelID"
     secret_feishu_name = "FeishuChannelID"
+    secret_dingtalk_name = "DingtalkChannelID"
     region_name = os.environ['AWS_REGION']
     get_secret_value_response_assumerole = ""
     get_secret_value_response_eventbus = ""
@@ -581,6 +619,7 @@ def get_secrets():
     get_secret_value_response_teams = ""
     get_secret_value_response_slack = ""
     get_secret_value_response_feishu = ""
+    get_secret_value_response_dingtalk = ""
     event_bus_name = "EventBusName"
     secret_assumerole_name = "AssumeRoleArn"
 
@@ -599,7 +638,7 @@ def get_secrets():
         if e.response['Error']['Code'] == 'AccessDeniedException':
             print("No AWS Secret configured for Teams, skipping")
             teams_channel_id = "None"
-        else: 
+        else:
             print("There was an error with the Teams secret: ",e.response)
             teams_channel_id = "None"
     finally:
@@ -660,6 +699,22 @@ def get_secrets():
             feishu_channel_id = "None"
 
     try:
+        get_secret_value_response_dingtalk = client.get_secret_value(
+            SecretId=secret_dingtalk_name
+        )
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'AccessDeniedException':
+            print("No AWS Secret configured for Dingtalk, skipping")
+            dingtalk_channel_id = "None"
+        else:
+            print("There was an error with the Dingtalk secret: ",e.response)
+            dingtalk_channel_id = "None"
+    finally:
+        if 'SecretString' in get_secret_value_response_dingtalk:
+            dingtalk_channel_id = get_secret_value_response_dingtalk['SecretString']
+        else:
+            dingtalk_channel_id = "None"
+    try:
         get_secret_value_response_assumerole = client.get_secret_value(
             SecretId=secret_assumerole_name
         )
@@ -697,6 +752,7 @@ def get_secrets():
             "slack": slack_channel_id,
             "chime": chime_channel_id,
             "feishu": feishu_channel_id,
+            "dingtalk": dingtalk_channel_id,
             "eventbusname": eventbus_channel_id,
             "ahaassumerole": assumerole_channel_id
         }

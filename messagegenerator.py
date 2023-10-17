@@ -563,6 +563,91 @@ def get_org_message_for_feishu(event_details, event_type, affected_org_accounts,
     print("Message sent to Feishu: ", message)
     return message
 
+def get_message_for_dingtalk(event_details, event_type, affected_accounts, affected_entities):
+    message = ""
+    summary = ""
+    if len(affected_entities) >= 1:
+        affected_entities = "\n".join(affected_entities)
+    else:
+        affected_entities = "All resources in region"
+    if len(affected_accounts) >= 1:
+        affected_accounts = "\n".join(affected_accounts)
+    else:
+        affected_accounts = "All accounts in region"
+    if event_type == "create":
+        message = {
+            "msgtype": "text",
+            "text": {
+                "content": "[Account(s)]: " + affected_accounts + "\n"
+                "[Resource(s)]: " + affected_entities + "\n"
+                "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
+                "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
+                "[Start Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['startTime']) + "\n"
+                "[Status]: " + event_details['successfulSet'][0]['event']['statusCode'] + "\n"
+                "[Event ARN]: " + event_details['successfulSet'][0]['event']['arn'] + "\n"
+                "[Updates]: " + "\n" + get_last_aws_update(event_details)
+            }
+        }
+    elif event_type == "resolve":
+        message = {
+            "msgtype": "text",
+            "text": {
+                "content": "[Account(s)]: " + affected_accounts + "\n"
+                "[Resource(s)]: " + affected_entities + "\n"
+                "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
+                "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
+                "[Start Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['startTime']) + "\n"
+                "[End Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['endTime']) + "\n"
+                "[Status]: " + event_details['successfulSet'][0]['event']['statusCode'] + "\n"
+                "[Event ARN]: " + event_details['successfulSet'][0]['event']['arn'] + "\n"
+                "[Updates]: " + "\n" + get_last_aws_update(event_details)
+            }
+        }
+    print("Message sent to DingTalk: ", message)
+    return message
+
+def get_org_message_for_dingtalk(event_details, event_type, affected_org_accounts, affected_org_entities):
+    message = ""
+    summary = ""
+    if len(affected_org_entities) >= 1:
+        affected_org_entities = "\n".join(affected_org_entities)
+    else:
+        affected_org_entities = "All resources in region"
+    if len(affected_org_accounts) >= 1:
+        affected_org_accounts = "\n".join(affected_org_accounts)
+    else:
+        affected_org_accounts = "All accounts in region"
+    if event_type == "create":
+        message = {
+            "msgtype": "text",
+            "text": {
+                "content": "[Account(s)]: " + affected_org_accounts + "\n"
+                "[Resource(s)]: " + affected_org_entities + "\n"
+                "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
+                "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
+                "[Start Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['startTime']) + "\n"
+                "[Status]: " + event_details['successfulSet'][0]['event']['statusCode'] + "\n"
+                "[Event ARN]: " + event_details['successfulSet'][0]['event']['arn'] + "\n"
+                "[Updates]: " + "\n" + get_last_aws_update(event_details)
+            }
+        }
+    elif event_type == "resolve":
+        message = {
+            "msgtype": "text",
+            "text": {
+                "content": "[Account(s)]: " + affected_org_accounts + "\n"
+                "[Resource(s)]: " + affected_org_entities + "\n"
+                "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
+                "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
+                "[Start Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['startTime']) + "\n"
+                "[End Time (UTC)]: " + cleanup_time(event_details['successfulSet'][0]['event']['endTime']) + "\n"
+                "[Status]: " + event_details['successfulSet'][0]['event']['statusCode'] + "\n"
+                "[Event ARN]: " + event_details['successfulSet'][0]['event']['arn'] + "\n"
+                "[Updates]: " + "\n" + get_last_aws_update(event_details)
+            }
+        }
+    print("Message sent to Dingtalk: ", message)
+    return message
 
 def get_message_for_email(event_details, event_type, affected_accounts, affected_entities):
     # Not srue why we have the new line in the affected entities code here

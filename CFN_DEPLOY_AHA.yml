@@ -15,13 +15,14 @@ Metadata:
           - S3Key
       - Label:
           default: >-
-            Communication Channels - Slack/Microsoft Teams/Amazon Chime/Feishu And/or
+            Communication Channels - Slack/Microsoft Teams/Amazon Chime/Feishu/Dingtalk And/or
             EventBridge
         Parameters:
           - SlackWebhookURL
           - MicrosoftTeamsWebhookURL
           - AmazonChimeWebhookURL
           - FeishuWebhookURL
+          - DingtalkWebhookURL
           - EventBusName
       - Label:
           default: Email Setup - For Alerting via Email
@@ -59,6 +60,8 @@ Metadata:
         default: Amazon Chime Webhook URL
       FeishuWebhookURL:
         default: Feishu Webhook URL
+      DingtalkWebhookURL:
+        default: Dingtalk Webhook URL
       FromEmail:
         default: Email From
       ToEmail:
@@ -78,8 +81,9 @@ Conditions:
   UsingTeams: !Not [!Equals [!Ref MicrosoftTeamsWebhookURL, None]]
   UsingChime: !Not [!Equals [!Ref AmazonChimeWebhookURL, None]]
   UsingFeishu: !Not [!Equals [!Ref FeishuWebhookURL, None]]
+  UsingDingtalk: !Not [!Equals [!Ref DingtalkWebhookURL, None]]
   UsingEventBridge: !Not [!Equals [!Ref EventBusName, None]]
-  UsingSecrets: !Or [!Condition UsingSlack, !Condition UsingTeams, !Condition UsingChime, !Condition UsingFeishu, !Condition UsingEventBridge, !Condition UsingCrossAccountRole]
+  UsingSecrets: !Or [!Condition UsingSlack, !Condition UsingTeams, !Condition UsingChime, !Condition UsingFeishu, !Condition UsingDingtalk, !Condition UsingEventBridge, !Condition UsingCrossAccountRole]
   UsingCrossAccountRole: !Not [!Equals [!Ref ManagementAccountRoleArn, None]]
   UsingCrossMemberAccountRole: !Not [!Equals [!Ref MemberAccountRoleArn, None]]
   NotUsingMultiRegion: !Equals [!Ref SecondaryRegion, 'No']
@@ -90,6 +94,7 @@ Conditions:
   UsingMultiRegionEventBridge: !And [!Condition UsingEventBridge, !Condition UsingMultiRegion]
   UsingMultiRegionChime: !And [!Condition UsingChime, !Condition UsingMultiRegion]
   UsingMultiRegionFeishu: !And [!Condition UsingFeishu, !Condition UsingMultiRegion]
+  UsingMultiRegionDingtalk: !And [!Condition UsingDingtalk, !Condition UsingMultiRegion]
   UsingMultiRegionCrossAccountRole: !And [!Condition UsingCrossAccountRole, !Condition UsingMultiRegion]
   UsingAccountIds: !Not [!Equals [!Ref AccountIDs, None]]  
 Parameters:
@@ -183,6 +188,12 @@ Parameters:
   FeishuWebhookURL:
     Description: >-
       Enter the Slack Webhook URL, If you don't prefer to use Feishu,
+      leave the default (None).
+    Type: String
+    Default: None
+  DingtalkWebhookURL:
+    Description: >-
+      Enter the Slack Webhook URL, If you don't prefer to use Dingtalk,
       leave the default (None).
     Type: String
     Default: None
@@ -476,6 +487,7 @@ Resources:
                    - !If [UsingEventBridge, !Sub '${EventBusNameSecret}', !Ref AWS::NoValue]
                    - !If [UsingChime, !Sub '${ChimeChannelSecret}', !Ref AWS::NoValue]
                    - !If [UsingFeishu, !Sub '${FeishuChannelSecret}', !Ref AWS::NoValue]
+                   - !If [UsingDingtalk, !Sub '${DingtalkChannelSecret}', !Ref AWS::NoValue]
                    - !If [UsingCrossAccountRole, !Sub '${AssumeRoleSecret}', !Ref AWS::NoValue]      
                    - !If
                      - UsingMultiRegionTeams
@@ -667,6 +679,22 @@ Resources:
         Ref: FeishuWebhookURL
       Tags:
         - Key: HealthCheckFeishu
+          Value: ChannelID
+  DingtalkChannelSecret:
+    Type: 'AWS::SecretsManager::Secret'
+    Condition: UsingDingtalk
+    Properties:
+      Name: DingtalkChannelID
+      Description: Dingtalk Channel ID Secret
+      ReplicaRegions:
+        !If
+        - UsingMultiRegion
+        - [{ Region: !Sub '${SecondaryRegion}' }]
+        - !Ref "AWS::NoValue"
+      SecretString:
+        Ref: DingtalkWebhookURL
+      Tags:
+        - Key: HealthCheckDingtalk
           Value: ChannelID
   AssumeRoleSecret:
     Type: 'AWS::SecretsManager::Secret'
