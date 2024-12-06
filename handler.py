@@ -1064,7 +1064,7 @@ def main(event, context):
     org_status = os.environ['ORG_STATUS']
 
     # check for Member Roles
-    if not (os.environ['MEMBER_ROLE_ARN'] == 'None' and os.environ['MEMBER_ROLE_ARN'] == ''):
+    if os.environ['MEMBER_ROLE_ARN'] and isinstance(os.environ['MEMBER_ROLE_ARN'], list) and len(os.environ['MEMBER_ROLE_ARN']) > 0:
         memberroles = getMemberRoles()
         for member_role in memberroles:
             health_client = get_sts_token('health', member_role)

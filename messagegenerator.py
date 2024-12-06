@@ -550,7 +550,7 @@ def get_org_message_for_feishu(event_details, event_type, affected_org_accounts,
             "msg_type": "text",
             "content": {
                 "text": summary + "\n"
-                "[Account(s)]: " + affected_accounts + "\n"
+                "[Account(s)]: " + affected_org_accounts + "\n"
                 "[Resource(s)]: " + affected_org_entities + "\n"
                 "[Service]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
@@ -569,7 +569,7 @@ def get_org_message_for_feishu(event_details, event_type, affected_org_accounts,
             "msg_type": "text",
             "content": {
                 "text": summary + "\n"
-                "[Account(s)]: " + affected_accounts + "\n"
+                "[Account(s)]: " + affected_org_accounts + "\n"
                 "[Resource(s)]: " + affected_org_entities + "\n"
                 "[Service]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
@@ -656,7 +656,7 @@ def get_org_message_for_dingtalk(event_details, event_type, affected_org_account
             "msgtype": "text",
             "text": {
                 "content": summary + "\n"
-                "[Account(s)]: " + affected_accounts + "\n"
+                "[Account(s)]: " + affected_org_accounts + "\n"
                 "[Resource(s)]: " + affected_org_entities + "\n"
                 "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
@@ -675,7 +675,7 @@ def get_org_message_for_dingtalk(event_details, event_type, affected_org_account
             "msgtype": "text",
             "text": {
                 "content": summary + "\n"
-                "[Account(s)]: " + affected_accounts + "\n"
+                "[Account(s)]: " + affected_org_accounts + "\n"
                 "[Resource(s)]: " + affected_org_entities + "\n"
                 "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
@@ -762,7 +762,7 @@ def get_org_message_for_wecom(event_details, event_type, affected_org_accounts, 
             "msgtype": "text",
             "text": {
                 "content": summary + "\n"
-                "[Account(s)]: " + affected_accounts + "\n"
+                "[Account(s)]: " + affected_org_accounts + "\n"
                 "[Resource(s)]: " + affected_org_entities + "\n"
                 "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
@@ -781,7 +781,7 @@ def get_org_message_for_wecom(event_details, event_type, affected_org_accounts, 
             "msgtype": "text",
             "text": {
                 "content": summary + "\n"
-                "[Account(s)]: " + affected_accounts + "\n"
+                "[Account(s)]: " + affected_org_accounts + "\n"
                 "[Resource(s)]: " + affected_org_entities + "\n"
                 "[Service(s)]: " + event_details['successfulSet'][0]['event']['service'] + "\n"
                 "[Region]: " + event_details['successfulSet'][0]['event']['region'] + "\n"
